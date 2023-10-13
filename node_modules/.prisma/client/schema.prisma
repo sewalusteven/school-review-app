@@ -20,14 +20,14 @@ model User {
 model School {
   id Int @id @default(autoincrement())
   name String
-  address String
-  district District? @relation(fields: [districtId], references: [id])
+  address String?
+  district District @relation(fields: [districtId], references: [id])
   districtId Int
-  about String
+  about String?
   history String?
-  phoneNumber String @db.VarChar(25)
-  email String @unique
-  curriculumId Int
+  phoneNumber String? @db.VarChar(25)
+  email String? @unique
+  curriculumId Int?
   curriculum Curriculum? @relation(fields: [curriculumId], references: [id])
   academicLevelId Int?
   academicLevel AcademicLevel? @relation(fields: [academicLevelId], references: [id])
@@ -63,22 +63,26 @@ model AcademicLevel {
   level String
   schools School[]
   subjects Subject[]
+  curriculumId Int?
+  curriculum Curriculum? @relation(fields: [curriculumId], references: [id])
 }
 
 model Curriculum {
   id Int @id @default(autoincrement())
   name String
+  description String?
   schools School[]
   subjects Subject[]
+  levels AcademicLevel[]
 }
 
 model Subject {
   id Int @id @default(autoincrement())
-  curriculumId Int
-  curriculum Curriculum @relation(fields: [curriculumId], references: [id])
+  curriculumId Int?
+  curriculum Curriculum? @relation(fields: [curriculumId], references: [id])
   subject String
-  academicLevelId Int
-  academicLevel AcademicLevel @relation(fields: [academicLevelId], references: [id])
+  academicLevelId Int?
+  academicLevel AcademicLevel? @relation(fields: [academicLevelId], references: [id])
   schoolsAttached SchoolSubject[]
 }
 
@@ -93,6 +97,7 @@ model SchoolSubject {
 model District {
   id Int @id @default(autoincrement())
   name String
+  region String?
   schools School[]
 }
 

@@ -2,29 +2,21 @@ import express, { Request, Response, NextFunction } from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { LocalStorage } from "node-localstorage";
+import {checkTokenMiddleware} from "./middleware/token-verification";
 
 import sample from "./api/sample";
+
 const app = express()
 const localStorage = new LocalStorage('./storage');
 
 app.use(bodyParser.json());
 app.use(cors());
 
-app.use('/api/v1/add-token',(req, res) => {
+app.post('/api/v1/add-token',(req:Request, res:Response) => {
     let {token} =  req.body
     localStorage.setItem('access-token', `Bearer ${token}`);
+    res.status(204).json({message:'updated'})
 });
-
-const checkTokenMiddleware =  (req:Request, res:Response, next:NextFunction) => {
-   if(localStorage.getItem('access-token') !== null){
-       let token = localStorage.getItem('access-token');
-       if(token !== req.headers.authorization){
-           res.status(401).json({error: 'Unauthorized'})
-       }
-       next()
-   }
-    res.status(401).json({error: 'Unauthorized'})
-}
 
 app.use(checkTokenMiddleware);
 
