@@ -1,7 +1,6 @@
-import {subjects} from "../server/datasets/subjects";
 
-
-import {Prisma, PrismaClient} from "@prisma/client";
+import {PrismaClient} from "@prisma/client";
+import {secSchools} from "../server/datasets/schools";
 
 const prisma = new PrismaClient()
 
@@ -20,34 +19,29 @@ function capitalizeFirstLetter(str: string):string {
 
 
 const seedSubjects =  async () => {
-    for (const s of subjects) {
-        await prisma.curriculum.findFirst({where: {
-                name: s.curriculum
-            }}).then(async res => {
-            if(res !== null){
-                let levels =  s.level.split(", ")
-                for (const level of levels) {
-                    await  prisma.academicLevel.findFirst({
-                        where: {
-                            level: level
-                        }
-                    }).then(async result => {
-                        if(result !== null){
-                            await prisma.subject.create({
-                                data: {
-                                    subject: s.subjectName,
-                                    curriculumId: res.id,
-                                    academicLevelId: result.id
-                                }
-                            })
-                        }
-                    })
 
+    secSchools.forEach(s => {
+        if(s.district === 'WAKISO'){
+            prisma.district.findFirst({
+                where: {
+                    name: "Wakiso"
                 }
-            }
-        })
-
-    }
+            }).then(district => {
+                prisma.school.create({
+                    data: {
+                        name: s.school,
+                        district: {
+                            connect: {
+                                id: district?.id
+                            }
+                        }
+                    }
+                }).then(res => {
+                    console.log('added')
+                })
+            })
+        }
+    })
 }
 
 

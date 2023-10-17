@@ -34,6 +34,8 @@ model School {
   photos SchoolPhoto[]
   reviews SchoolReview[]
   subjects SchoolSubject[]
+  createdAt DateTime @default(now())
+  deletedAt DateTime?
 
 }
 
@@ -46,6 +48,8 @@ model SchoolReview {
   userId Int?
   schoolId Int
   school School @relation(fields: [schoolId], references: [id])
+  createdAt DateTime @default(now())
+  deletedAt DateTime?
 
 }
 

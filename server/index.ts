@@ -4,13 +4,17 @@ import cors from "cors";
 import { LocalStorage } from "node-localstorage";
 import {checkTokenMiddleware} from "./middleware/token-verification";
 
-import sample from "./api/sample";
+
 
 const app = express()
 const localStorage = new LocalStorage('./storage');
 
 app.use(bodyParser.json());
 app.use(cors());
+
+
+import schools from "./api/schools";
+import curriculum from "./api/curriculum";
 
 app.post('/api/v1/add-token',(req:Request, res:Response) => {
     let {token} =  req.body
@@ -21,7 +25,8 @@ app.post('/api/v1/add-token',(req:Request, res:Response) => {
 app.use(checkTokenMiddleware);
 
 
-app.use('/api/v1',  sample);
+app.use('/api/v1/schools',  schools);
+app.use('/api/v1/curriculums',  curriculum);
 
 const server = app.listen(3000, () =>
   console.log(`

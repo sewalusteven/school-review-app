@@ -9,6 +9,8 @@ export const checkTokenMiddleware =  (req:Request, res:Response, next:NextFuncti
             res.status(401).json({error: 'Unauthorized'})
         }
         next()
+    }else {
+        res.status(401).json({error: 'Unauthorized'})
     }
-    res.status(401).json({error: 'Unauthorized'})
+
 }
