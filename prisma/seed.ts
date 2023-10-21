@@ -1,11 +1,13 @@
 
 import {PrismaClient} from "@prisma/client";
-import {secSchools} from "../server/datasets/schools";
+//import {secSchools, primarySchools} from "../server/datasets/schools";
+import {ugandaDistricts} from "../server/datasets/districts";
+import {primarySchools, secSchools} from "../server/datasets/schools";
 
 const prisma = new PrismaClient()
 
 async function  main(){
-     await seedSubjects()
+     await seedSecSchools()
 }
 
 function capitalizeFirstLetter(str: string):string {
@@ -18,31 +20,31 @@ function capitalizeFirstLetter(str: string):string {
 
 
 
-const seedSubjects =  async () => {
+const seedSecSchools =  async () => {
 
-    secSchools.forEach(s => {
-        if(s.district === 'WAKISO'){
-            prisma.district.findFirst({
-                where: {
-                    name: "Wakiso"
-                }
-            }).then(district => {
-                prisma.school.create({
-                    data: {
-                        name: s.school,
-                        district: {
-                            connect: {
-                                id: district?.id
-                            }
-                        }
-                    }
-                }).then(res => {
-                    console.log('added')
-                })
-            })
-        }
-    })
+    for (const s of primarySchools) {
+
+
+        const district =  await prisma.district.findFirstOrThrow({
+            where: {
+                name: capitalizeFirstLetter(s.district)
+            }
+        })
+
+         await prisma.school.create({
+            data: {
+                name: s.school,
+                phoneNumber: s.contact,
+                districtId: district.id,
+                curriculumId: 1,
+                academicLevelId: 104
+
+            }
+        })
+    }
 }
+
+
 
 
 main().catch(e => {

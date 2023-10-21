@@ -10,6 +10,12 @@ const skip = (page:number, limit: number = perPage) => {
     return limit * (page - 1);
 }
 
+router.get("/count", (req, res) => {
+    prisma.school.count().then(total => {
+        res.status(201).json(total)
+    });
+})
+
 router.post('',  (req, res) => {
 
     let offset = (req.body.page)?skip(req.body.page):0;
@@ -190,9 +196,7 @@ router.get('/:id',  ({params }, res) => {
             subjects: true
         }
     }).then(r => {
-        res.status(200).json({
-            data: r
-        })
+        res.status(200).json(r)
     }).catch(e => {
         res.status(404).json({message: e})
     })
