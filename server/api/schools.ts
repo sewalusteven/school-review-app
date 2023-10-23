@@ -1,6 +1,10 @@
 import {Prisma, PrismaClient} from "@prisma/client";
-import express from 'express';
+import express, {Request} from 'express';
+import multer from "multer";
+import path from 'path';
+import fs from 'fs';
 const router = express.Router();
+
 
 const perPage=20
 
@@ -10,6 +14,78 @@ const skip = (page:number, limit: number = perPage) => {
     return limit * (page - 1);
 }
 
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, '../uploads');
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const extname = path.extname(file.originalname);
+        cb(null, uniqueSuffix + extname);
+    },
+});
+
+const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+    if(file === undefined){
+        cb(null, false)
+    }else if (file.size > 2000000) {
+        cb(null, false)
+    } else {
+        cb(null, true);
+    }
+};
+
+const upload = multer({ storage, fileFilter});
+
+router.post("/upload",upload.single('image'), (req, res) => {
+    if(req.file === undefined){
+        return res.status(400).json({ error: 'No file uploaded.' });
+    }
+
+    const file = req.file;
+
+    if (file.size > 2000000) {
+        return res.status(400).send('Image size is too large');
+    }
+
+    if(req.body.type === 'Thumb'){
+        prisma.schoolPhoto.findFirst({
+            where: {
+                schoolId: req.body.schoolId,
+                type:'Thumb'
+            }
+        }).then(existingThumb => {
+            if (existingThumb?.path && fs.existsSync(existingThumb.path)) {
+                // Delete the file
+                fs.unlinkSync(existingThumb.path);
+            }
+
+            prisma.schoolPhoto.create({
+                data: {
+                    path: file.path,
+                    type: "Thumb",
+                    schoolId: req.body.schoolId
+                }
+            }).then(msg => {
+                res.send('School Badge uploaded successfully');
+            })
+
+        })
+    }else {
+        prisma.schoolPhoto.create({
+            data: {
+                path: file.path,
+                type: req.body.type,
+                schoolId: req.body.schoolId
+            }
+        }).then(msg => {
+            res.send('Image uploaded successfully');
+        })
+    }
+
+
+
+})
 router.get("/count", (req, res) => {
     prisma.school.count().then(total => {
         res.status(201).json(total)

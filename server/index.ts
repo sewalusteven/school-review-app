@@ -11,6 +11,7 @@ const localStorage = new LocalStorage('./storage');
 
 app.use(bodyParser.json());
 app.use(cors());
+app.use('./uploads', express.static('uploads'));
 
 
 import schools from "./api/schools";
